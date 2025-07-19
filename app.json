@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "habbit-tracker",
+    "slug": "habbit-tracker",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "habbit-tracker",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
