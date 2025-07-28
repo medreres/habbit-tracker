@@ -4,6 +4,7 @@ import { Text } from "@/components/ui/text";
 import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
 import { useRouter } from "expo-router";
+import { useHabbits } from "@/hooks/useHabbits";
 
 interface HabitFormData {
   name: string;
@@ -17,6 +18,7 @@ interface HabitFormData {
 
 export default function HabitFormModal() {
   const router = useRouter();
+  const { addHabit } = useHabbits();
   const [formData, setFormData] = useState<HabitFormData>({
     name: "",
     repeat: "Щодня",
@@ -27,8 +29,16 @@ export default function HabitFormModal() {
     startDate: "Сьогодні",
   });
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // Pass data back to previous screen
+    await addHabit({
+      name: formData.name,
+      buttonIcon: '',
+      buttonText: '',
+      color: '',
+      icon: '',
+      progress: ''
+    });
     router.back();
     // You can also use router.setParams() to pass data back
   };
@@ -37,36 +47,36 @@ export default function HabitFormModal() {
     router.back();
   };
 
-  const SelectionRow = ({
-    icon,
-    label,
-    value,
-    onPress,
-  }: {
-    icon: string;
-    label: string;
-    value: string;
-    onPress: () => void;
-  }) => (
-    <Pressable onPress={onPress}>
-      <HStack
-        className="justify-between items-center bg-white p-4 rounded-lg mb-2 shadow-sm"
-        space="md">
-        <HStack
-          space="md"
-          className="items-center flex-1">
-          <View className="w-10 h-10 bg-gray-100 rounded-lg items-center justify-center">
-            <Text className="text-lg">{icon}</Text>
-          </View>
-          <VStack space="xs">
-            <Text className="text-gray-500 text-xs uppercase tracking-wide font-medium">{label}</Text>
-            <Text className="text-black text-base">{value}</Text>
-          </VStack>
-        </HStack>
-        <Text className="text-gray-400 text-lg">›</Text>
-      </HStack>
-    </Pressable>
-  );
+  // const SelectionRow = ({
+  //   icon,
+  //   label,
+  //   value,
+  //   onPress,
+  // }: {
+  //   icon: string;
+  //   label: string;
+  //   value: string;
+  //   onPress: () => void;
+  // }) => (
+  //   <Pressable onPress={onPress}>
+  //     <HStack
+  //       className="justify-between items-center bg-white p-4 rounded-lg mb-2 shadow-sm"
+  //       space="md">
+  //       <HStack
+  //         space="md"
+  //         className="items-center flex-1">
+  //         <View className="w-10 h-10 bg-gray-100 rounded-lg items-center justify-center">
+  //           <Text className="text-lg">{icon}</Text>
+  //         </View>
+  //         <VStack space="xs">
+  //           <Text className="text-gray-500 text-xs uppercase tracking-wide font-medium">{label}</Text>
+  //           <Text className="text-black text-base">{value}</Text>
+  //         </VStack>
+  //       </HStack>
+  //       <Text className="text-gray-400 text-lg">›</Text>
+  //     </HStack>
+  //   </Pressable>
+  // );
 
   return (
     <>

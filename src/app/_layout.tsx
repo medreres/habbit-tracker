@@ -8,6 +8,7 @@ import { useColorScheme } from "@/components/useColorScheme";
 import { Slot, Stack } from "expo-router";
 
 import "../global.css";
+import { QueryProvider } from "../components/query-provider";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -34,12 +35,6 @@ export default function RootLayout() {
     if (error) throw error;
   }, [error]);
 
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
   useLayoutEffect(() => {
     setStyleLoaded(true);
   }, [styleLoaded]);
@@ -48,7 +43,14 @@ export default function RootLayout() {
     return null;
   }
 
-  return <RootLayoutNav />;
+  return (
+    <QueryProvider
+      onRestored={() => {
+        SplashScreen.hideAsync();
+      }}>
+      <RootLayoutNav />
+    </QueryProvider>
+  );
 }
 
 function RootLayoutNav() {

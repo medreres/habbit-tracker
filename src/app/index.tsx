@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, ScrollView, TextInput, Pressable, StatusBar } from "react-native";
+import { View, ScrollView, Pressable } from "react-native";
 import { Text } from "@/components/ui/text";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { HStack } from "@/components/ui/hstack";
@@ -8,39 +8,11 @@ import { Button } from "@/components/ui/button";
 import { useMemo } from "react";
 import { locale } from "@/constants/locale";
 import { useRouter } from "expo-router";
+import { useHabbits } from "@/hooks/useHabbits";
 
 export default function Home() {
   const router = useRouter();
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const habits = [
-    {
-      id: 1,
-      name: "Плавати",
-      progress: "0/1 раз",
-      icon: "🏊‍♂️",
-      color: "bg-blue-500",
-      buttonText: "Виконано",
-      buttonIcon: "✓",
-    },
-    {
-      id: 2,
-      name: "Прогулянка",
-      progress: "0/30 хв",
-      icon: "🚶‍♂️",
-      color: "bg-purple-500",
-      buttonText: "Таймер",
-      buttonIcon: "⏱️",
-    },
-    {
-      id: 3,
-      name: "Читати книжки",
-      progress: "0/5 хв",
-      icon: "📚",
-      color: "bg-orange-500",
-      buttonText: "Таймер",
-      buttonIcon: "⏱️",
-    },
-  ];
+  const { habits } = useHabbits();
 
   const dates = useMemo(() => {
     const today = new Date();
@@ -121,8 +93,7 @@ export default function Home() {
                 <HStack
                   space="sm"
                   className="items-center">
-                  <Text className="text-white text-sm">{habit.buttonIcon}</Text>
-                  <Text className="text-white text-sm font-medium">{habit.buttonText}</Text>
+                  <Text className="text-white text-sm font-medium">Виконано</Text>
                 </HStack>
               </Button>
             </HStack>
