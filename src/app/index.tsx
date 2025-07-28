@@ -1,5 +1,5 @@
-import React from "react";
-import { View, ScrollView, Pressable } from "react-native";
+import React, { useState } from "react";
+import { View, ScrollView, TextInput, Pressable, StatusBar } from "react-native";
 import { Text } from "@/components/ui/text";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { HStack } from "@/components/ui/hstack";
@@ -7,8 +7,11 @@ import { VStack } from "@/components/ui/vstack";
 import { Button } from "@/components/ui/button";
 import { useMemo } from "react";
 import { locale } from "@/constants/locale";
+import { useRouter } from "expo-router";
 
 export default function Home() {
+  const router = useRouter();
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const habits = [
     {
       id: 1,
@@ -64,6 +67,11 @@ export default function Home() {
 
     return datesArray;
   }, []);
+
+  const handleSaveHabit = (habitData: any) => {
+    console.log("Saving habit:", habitData);
+    // Add your habit saving logic here
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -131,9 +139,8 @@ export default function Home() {
           showsHorizontalScrollIndicator={false}
           contentOffset={{
             x: dates.length * 100,
-            y: 0
-          }}
-          >
+            y: 0,
+          }}>
           {dates.map((date, index) => (
             <Pressable
               key={index}
@@ -154,9 +161,11 @@ export default function Home() {
             </Pressable>
           ))}
         </ScrollView>
-        <View className="w-12 h-12 bg-blue-500 rounded-full items-center justify-center">
+        <Pressable
+          onPress={() => router.push("/create-habbit")}
+          className="w-12 h-12 bg-blue-500 rounded-full items-center justify-center">
           <Text className="text-white text-xl">+</Text>
-        </View>
+        </Pressable>
       </HStack>
     </SafeAreaView>
   );
