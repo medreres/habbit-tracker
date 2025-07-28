@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, ScrollView, Pressable } from "react-native";
+import { View, ScrollView, Pressable, Alert } from "react-native";
 import { Text } from "@/components/ui/text";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
 import { HStack } from "@/components/ui/hstack";
@@ -9,10 +9,12 @@ import { useMemo } from "react";
 import { locale } from "@/constants/locale";
 import { useRouter } from "expo-router";
 import { useHabbits } from "@/hooks/useHabbits";
+import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
+import Reanimated, { SharedValue, useAnimatedStyle } from "react-native-reanimated";
 
 export default function Home() {
   const router = useRouter();
-  const { habits } = useHabbits();
+  const { habits, deleteHabit } = useHabbits();
 
   const dates = useMemo(() => {
     const today = new Date();
@@ -75,28 +77,65 @@ export default function Home() {
           space="md"
           className="px-4 py-2">
           {habits.map((habit) => (
-            <HStack
+            <Swipeable
               key={habit.id}
-              className="justify-between items-center bg-gray-50 p-4 rounded-lg">
-              <HStack
-                space="md"
-                className="items-center flex-1">
-                <View className={`w-12 h-12 ${habit.color} rounded-full items-center justify-center`}>
-                  <Text className="text-white text-lg">{habit.icon}</Text>
-                </View>
-                <VStack space="xs">
-                  <Text className="text-black font-medium text-base">{habit.name}</Text>
-                  <Text className="text-gray-500 text-sm">{habit.progress}</Text>
-                </VStack>
-              </HStack>
-              <Button className="bg-blue-400 px-4 py-2 rounded-full">
+              renderRightActions={(prog: SharedValue<number>, drag: SharedValue<number>) => {
+                const styleAnimation = useAnimatedStyle(() => {
+                  return {
+                    transform: [{ translateX: drag.value + 50 }],
+                  };
+                });
+
+                const handleDelete = () => {
+                  Alert.alert("Видалити звичку", "Ви впевнені, що хочете видалити цю звичку?", [
+                    {
+                      text: "Скасувати",
+                      style: "cancel",
+                    },
+                    {
+                      text: "Видалити",
+                      style: "destructive",
+                      onPress: () => {
+                        deleteHabit(habit.id);
+                      },
+                    },
+                  ]);
+                };
+
+                return (
+                  <Reanimated.View
+                    style={styleAnimation}
+                    className="items-center flex-col">
+                    <Pressable
+                      onPress={handleDelete}
+                      className="bg-red-500 rounded-lg items-center justify-center"
+                      style={{ width: 50, height: 50 }}>
+                      <Text className="text-white">Delete</Text>
+                    </Pressable>
+                  </Reanimated.View>
+                );
+              }}>
+              <HStack className="justify-between items-center bg-gray-50 p-4 rounded-lg">
                 <HStack
-                  space="sm"
-                  className="items-center">
-                  <Text className="text-white text-sm font-medium">Виконано</Text>
+                  space="md"
+                  className="items-center flex-1">
+                  <View className={`w-12 h-12 ${habit.color} rounded-full items-center justify-center`}>
+                    <Text className="text-white text-lg">{habit.icon}</Text>
+                  </View>
+                  <VStack space="xs">
+                    <Text className="text-black font-medium text-base">{habit.name}</Text>
+                    <Text className="text-gray-500 text-sm">{habit.progress}</Text>
+                  </VStack>
                 </HStack>
-              </Button>
-            </HStack>
+                <Button className="bg-blue-400 px-4 py-2 rounded-full">
+                  <HStack
+                    space="sm"
+                    className="items-center">
+                    <Text className="text-white text-sm font-medium">Виконано</Text>
+                  </HStack>
+                </Button>
+              </HStack>
+            </Swipeable>
           ))}
         </VStack>
       </ScrollView>

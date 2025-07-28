@@ -6,6 +6,7 @@ import { useEffect, useLayoutEffect, useState } from "react";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import { useColorScheme } from "@/components/useColorScheme";
 import { Slot, Stack } from "expo-router";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import "../global.css";
 import { QueryProvider } from "../components/query-provider";
@@ -57,24 +58,26 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
-    <GluestackUIProvider mode={colorScheme === "dark" ? "dark" : "light"}>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen
-            name="index"
-            options={{
-              headerShown: false,
-            }}
-          />
-          <Stack.Screen
-            name="create-habbit"
-            options={{
-              presentation: "modal",
-              headerShown: false,
-            }}
-          />
-        </Stack>
-      </ThemeProvider>
-    </GluestackUIProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <GluestackUIProvider mode={colorScheme === "dark" ? "dark" : "light"}>
+        <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+          <Stack>
+            <Stack.Screen
+              name="index"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="create-habbit"
+              options={{
+                presentation: "modal",
+                headerShown: false,
+              }}
+            />
+          </Stack>
+        </ThemeProvider>
+      </GluestackUIProvider>
+    </GestureHandlerRootView>
   );
 }
