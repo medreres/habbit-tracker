@@ -1,43 +1,54 @@
-import React, { useState } from "react";
+import React, { useLayoutEffect, ReactNode } from "react";
 import { View, ScrollView, TextInput, Pressable, StatusBar } from "react-native";
 import { Text } from "@/components/ui/text";
 import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
-import { useRouter } from "expo-router";
+import { useNavigation, useRouter } from "expo-router";
 import { useHabbits } from "@/hooks/useHabbits";
-
-interface HabitFormData {
-  name: string;
-  repeat: string;
-  goal: string;
-  timeOfDay: string;
-  reminder: string;
-  checklist: string;
-  startDate: string;
-}
+import { ChevronRight, Repeat } from "lucide-react-native";
+import { Icon } from "@/components/ui/icon";
+import { useHabitForm } from "@/contexts/HabitFormContext";
+import { locale } from "@/constants/locale";
 
 export default function HabitFormModal() {
   const router = useRouter();
+  const navigation = useNavigation();
   const { addHabit } = useHabbits();
-  const [formData, setFormData] = useState<HabitFormData>({
-    name: "",
-    repeat: "Щодня",
-    goal: "1 раз на день",
-    timeOfDay: "Будь-який час",
-    reminder: "09:00",
-    checklist: "Нічого",
-    startDate: "Сьогодні",
-  });
+  const { formData, updateFormData } = useHabitForm();
+
+  // Helper function to format day names using Intl API
+  const formatSelectedDays = (selectedDays: Map<string, boolean>) => {
+    if (Array.from(selectedDays.values()).filter(Boolean).length === 7) {
+      return "Щодня";
+    }
+
+    const formatter = new Intl.DateTimeFormat(locale, { weekday: "short" });
+
+    const dayMap: { [key: string]: Date } = {
+      monday: new Date(2024, 0, 1), // Monday
+      tuesday: new Date(2024, 0, 2), // Tuesday
+      wednesday: new Date(2024, 0, 3), // Wednesday
+      thursday: new Date(2024, 0, 4), // Thursday
+      friday: new Date(2024, 0, 5), // Friday
+      saturday: new Date(2024, 0, 6), // Saturday
+      sunday: new Date(2024, 0, 7), // Sunday
+    };
+
+    return Array.from(selectedDays.entries())
+      .filter(([_, value]) => value)
+      .map(([key]) => formatter.format(dayMap[key]))
+      .join(", ");
+  };
 
   const handleSave = async () => {
     // Pass data back to previous screen
     await addHabit({
       name: formData.name,
-      buttonIcon: '',
-      buttonText: '',
-      color: '',
-      icon: '',
-      progress: ''
+      buttonIcon: "",
+      buttonText: "",
+      color: "",
+      icon: "",
+      progress: "",
     });
     router.back();
     // You can also use router.setParams() to pass data back
@@ -47,50 +58,59 @@ export default function HabitFormModal() {
     router.back();
   };
 
-  // const SelectionRow = ({
-  //   icon,
-  //   label,
-  //   value,
-  //   onPress,
-  // }: {
-  //   icon: string;
-  //   label: string;
-  //   value: string;
-  //   onPress: () => void;
-  // }) => (
-  //   <Pressable onPress={onPress}>
-  //     <HStack
-  //       className="justify-between items-center bg-white p-4 rounded-lg mb-2 shadow-sm"
-  //       space="md">
-  //       <HStack
-  //         space="md"
-  //         className="items-center flex-1">
-  //         <View className="w-10 h-10 bg-gray-100 rounded-lg items-center justify-center">
-  //           <Text className="text-lg">{icon}</Text>
-  //         </View>
-  //         <VStack space="xs">
-  //           <Text className="text-gray-500 text-xs uppercase tracking-wide font-medium">{label}</Text>
-  //           <Text className="text-black text-base">{value}</Text>
-  //         </VStack>
-  //       </HStack>
-  //       <Text className="text-gray-400 text-lg">›</Text>
-  //     </HStack>
-  //   </Pressable>
-  // );
+  // Set header buttons from the screen itself
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => (
+        <Pressable onPress={handleCancel}>
+          <Text className="text-blue-500 text-base font-medium">Скасувати</Text>
+        </Pressable>
+      ),
+      headerRight: () => (
+        <Pressable onPress={handleSave}>
+          <Text className="text-blue-500 text-base font-medium">Зберегти</Text>
+        </Pressable>
+      ),
+    });
+  }, [router, formData.name]); // Re-run when form data changes
+
+  const SelectionRow = ({
+    icon,
+    label,
+    value,
+    onPress,
+  }: {
+    icon: ReactNode;
+    label: string;
+    value: string;
+    onPress: () => void;
+  }) => (
+    <Pressable onPress={onPress}>
+      <HStack
+        className="justify-between items-center bg-white p-4 rounded-lg mb-2 shadow-sm"
+        space="md">
+        <HStack
+          space="md"
+          className="items-center flex-1">
+          <View className="w-10 h-10 bg-gray-100 rounded-lg items-center justify-center">
+            <Text className="text-lg">{icon}</Text>
+          </View>
+          <VStack space="xs">
+            <Text className="text-gray-500 text-xs uppercase tracking-wide font-medium">{label}</Text>
+            <Text className="text-black text-base">{value}</Text>
+          </VStack>
+        </HStack>
+        <Icon
+          as={ChevronRight}
+          className="color-gray-400"
+        />
+      </HStack>
+    </Pressable>
+  );
 
   return (
     <>
       <StatusBar barStyle="dark-content" />
-
-      {/* Header */}
-      <HStack className="justify-between items-center px-4 py-3 bg-white border-b border-gray-200">
-        <Pressable onPress={handleCancel}>
-          <Text className="text-blue-500 text-base font-medium">Скасувати</Text>
-        </Pressable>
-        <Pressable onPress={handleSave}>
-          <Text className="text-blue-500 text-base font-medium">Зберегти</Text>
-        </Pressable>
-      </HStack>
 
       {/* Content */}
       <ScrollView className="flex-1 px-4 py-4">
@@ -107,19 +127,19 @@ export default function HabitFormModal() {
               placeholder="Назва"
               placeholderTextColor="#9CA3AF"
               value={formData.name}
-              onChangeText={(text) => setFormData({ ...formData, name: text })}
+              onChangeText={(text) => updateFormData({ name: text })}
             />
           </HStack>
-          {/* 
           <SelectionRow
-            icon=""
+            icon={<Icon as={Repeat} />}
             label="ПОВТОРИТИ"
-            value={formData.repeat}
+            value={formatSelectedDays(formData.selectedDays)}
             onPress={() => {
-              router.push("/repeat-selection");
+              router.push("/create-habbit/frequency");
             }}
           />
 
+          {/* 
           <SelectionRow
             icon=""
             label="МЕТА"
