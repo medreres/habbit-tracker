@@ -223,19 +223,36 @@ export default function Home() {
                   </HStack>
                   <Button
                     onPress={async () => {
-                      console.log("habit", habit);
-                      await HabbitRecordRepository.create({
-                        id: generateId(),
-                        actualValue: 1,
-                        completedAt: selectedDate, // Use selectedDate instead of new Date()
-                        habbitId: habit.id,
-                        requiredValue: habit.requiredValue,
-                        requiredType: habit.requiredType,
-                      });
+                      if (isCompleted) {
+                        // If habit is completed, cancel the most recent record
+                        const habitRecords = records.filter((record) => record.habbitId === habit.id);
+                        
+                        if (habitRecords.length > 0) {
+                          const mostRecentRecord = habitRecords[habitRecords.length - 1];
+                          
+                          try {
+                            await HabbitRecordRepository.delete(mostRecentRecord.id);
+                            await refetch();
+                            console.log("Habbit record cancelled");
+                          } catch (error) {
+                            console.error("Error cancelling habbit record:", error);
+                          }
+                        }
+                      } else {
+                        // If habit is not completed, create a new record
+                        console.log("habit", habit);
+                        await HabbitRecordRepository.create({
+                          id: generateId(),
+                          actualValue: 1,
+                          completedAt: selectedDate,
+                          habbitId: habit.id,
+                          requiredValue: habit.requiredValue,
+                          requiredType: habit.requiredType,
+                        });
 
-                      await refetch();
-
-                      console.log("Habbit record created");
+                        await refetch();
+                        console.log("Habbit record created");
+                      }
                     }}
                     className={`px-4 py-2 rounded-full ${isCompleted ? "bg-gray-400" : "bg-blue-400"}`}>
                     <HStack
