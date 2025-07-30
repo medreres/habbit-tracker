@@ -1,14 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { generateId } from "@/utils/idGenerator";
 
 export interface Habit {
-  id: number;
+  id: string;
   name: string;
   progress: string;
   icon: string;
   color: string;
   buttonText: string;
   buttonIcon: string;
+  requiredValue: number;
+  requiredType: string;
 }
 
 const HABITS_STORAGE_KEY = "habits";
@@ -53,7 +56,7 @@ export const useHabbits = () => {
     mutationFn: async (habit: Omit<Habit, "id">) => {
       const newHabit: Habit = {
         ...habit,
-        id: Math.max(...habits.map((h) => h.id), 0) + 1,
+        id: generateId(),
       };
       const updatedHabits = [...habits, newHabit];
       await habitsApi.saveHabits(updatedHabits);
@@ -66,7 +69,7 @@ export const useHabbits = () => {
 
   // Mutation for updating a habit
   const updateHabitMutation = useMutation({
-    mutationFn: async ({ id, updates }: { id: number; updates: Partial<Habit> }) => {
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Habit> }) => {
       const updatedHabits = habits.map((habit) =>
         habit.id === id ? { ...habit, ...updates } : habit
       );
@@ -80,7 +83,7 @@ export const useHabbits = () => {
 
   // Mutation for deleting a habit
   const deleteHabitMutation = useMutation({
-    mutationFn: async (id: number) => {
+    mutationFn: async (id: string) => {
       const updatedHabits = habits.filter((habit) => habit.id !== id);
       await habitsApi.saveHabits(updatedHabits);
       return id;
@@ -95,15 +98,15 @@ export const useHabbits = () => {
     return addHabitMutation.mutateAsync(habit);
   };
 
-  const updateHabit = (id: number, updates: Partial<Habit>) => {
+  const updateHabit = (id: string, updates: Partial<Habit>) => {
     updateHabitMutation.mutate({ id, updates });
   };
 
-  const deleteHabit = (id: number) => {
+  const deleteHabit = (id: string) => {
     deleteHabitMutation.mutate(id);
   };
 
-  const getHabitById = (id: number) => {
+  const getHabitById = (id: string) => {
     return habits.find((habit) => habit.id === id);
   };
 

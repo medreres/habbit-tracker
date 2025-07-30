@@ -8,6 +8,8 @@ interface HabitFormData {
   checklist: string;
   startDate: string;
   selectedDays: Map<string, boolean>;
+  requiredValue: number;
+  requiredType: 'minutes' | 'hours' | 'times' | 'liters';
 }
 
 interface HabitFormContextType {
@@ -27,6 +29,8 @@ const defaultFormData: HabitFormData = {
     const date = new Date(2024, 0, i + 7); // Using Jan 7-13 2024 to get all days
     return [date.toLocaleDateString("en-US", { weekday: "long" }).toLowerCase(), true];
   })),
+  requiredValue: 1,
+  requiredType: 'times',
 };
 
 const HabitFormContext = createContext<HabitFormContextType | undefined>(undefined);

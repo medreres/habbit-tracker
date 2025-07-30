@@ -10,6 +10,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import "../global.css";
 import { QueryProvider } from "../components/query-provider";
+import { useDatabase } from "@/hooks/useDatabase";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -25,22 +26,18 @@ export {
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const { isInitialized, error: dbError } = useDatabase();
   const [loaded, error] = useFonts({
     SpaceMono: require("../../assets/fonts/SpaceMono-Regular.ttf"),
     ...FontAwesome.font,
   });
 
-  const [styleLoaded, setStyleLoaded] = useState(false);
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
-    if (error) throw error;
-  }, [error]);
+    if (error || dbError) throw error || dbError;
+  }, [error, dbError]);
 
-  useLayoutEffect(() => {
-    setStyleLoaded(true);
-  }, [styleLoaded]);
-
-  if (!loaded || !styleLoaded) {
+  if (!loaded || !isInitialized) {
     return null;
   }
 

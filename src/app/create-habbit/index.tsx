@@ -5,7 +5,7 @@ import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
 import { useNavigation, useRouter } from "expo-router";
 import { useHabbits } from "@/hooks/useHabbits";
-import { ChevronRight, Repeat } from "lucide-react-native";
+import { ChevronRight, Repeat, Target } from "lucide-react-native";
 import { Icon } from "@/components/ui/icon";
 import { useHabitForm } from "@/contexts/HabitFormContext";
 import { locale } from "@/constants/locale";
@@ -40,15 +40,30 @@ export default function HabitFormModal() {
       .join(", ");
   };
 
+  // Helper function to format required value and type
+  const formatRequiredValue = (value: number, type: string) => {
+    const typeMap: { [key: string]: string } = {
+      'minutes': 'хв',
+      'hours': 'год',
+      'times': 'раз',
+      'liters': 'л'
+    };
+    
+    const typeText = typeMap[type] || type;
+    return `${value} ${typeText}`;
+  };
+
   const handleSave = async () => {
     // Pass data back to previous screen
     await addHabit({
       name: formData.name,
       buttonIcon: "",
       buttonText: "",
-      color: "",
-      icon: "",
+      color: "bg-blue-500",
+      icon: "🎯",
       progress: "",
+      requiredValue: formData.requiredValue,
+      requiredType: formData.requiredType,
     });
     router.back();
     // You can also use router.setParams() to pass data back
@@ -130,6 +145,7 @@ export default function HabitFormModal() {
               onChangeText={(text) => updateFormData({ name: text })}
             />
           </HStack>
+          
           <SelectionRow
             icon={<Icon as={Repeat} />}
             label="ПОВТОРИТИ"
@@ -139,16 +155,16 @@ export default function HabitFormModal() {
             }}
           />
 
-          {/* 
           <SelectionRow
-            icon=""
+            icon={<Icon as={Target} />}
             label="МЕТА"
-            value={formData.goal}
+            value={formatRequiredValue(formData.requiredValue, formData.requiredType)}
             onPress={() => {
-              router.push("/goal-selection");
+              // router.push("/create-habbit/goal");
             }}
           />
 
+          {/* 
           <SelectionRow
             icon="☀️"
             label="ЧАС ДНЯ"
