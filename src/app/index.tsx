@@ -81,7 +81,9 @@ export default function Home() {
       <VStack
         space="md"
         className="px-4 py-2">
-        <Text className="text-gray-500 text-sm uppercase tracking-wide">СЬОГОДНІ</Text>
+        <Text className="text-gray-500 text-sm uppercase tracking-wide">
+          {selectedDate.toDateString() === new Date().toDateString() ? "СЬОГОДНІ" : selectedDate.toLocaleDateString(locale, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+        </Text>
         <HStack className="justify-between items-center">
           <HStack
             space="sm"
@@ -105,8 +107,9 @@ export default function Home() {
           space="md"
           className="px-4 py-2">
           {habits.map((habit) => {
-            // Calculate total actual value for the selected date
-            const totalActualValue = records.reduce((sum, record) => sum + record.actualValue, 0);
+            // Filter records for this specific habit and selected date
+            const habitRecords = records.filter((record) => record.habbitId === habit.id);
+            const totalActualValue = habitRecords.reduce((sum, record) => sum + record.actualValue, 0);
             const requiredValue = habit.requiredValue || 1;
             const requiredType = habit.requiredType || "times";
 
@@ -123,8 +126,8 @@ export default function Home() {
                     };
                   });
                   const handleCancel = async () => {
-                    // Filter records for this specific habit
-                    const habitRecords = records.filter((record) => record.habbitId == habit.id);
+                    // Filter records for this specific habit and selected date
+                    const habitRecords = records.filter((record) => record.habbitId === habit.id);
 
                     console.log("habitRecords", habitRecords);
 
@@ -224,7 +227,7 @@ export default function Home() {
                       await HabbitRecordRepository.create({
                         id: generateId(),
                         actualValue: 1,
-                        completedAt: new Date(),
+                        completedAt: selectedDate, // Use selectedDate instead of new Date()
                         habbitId: habit.id,
                         requiredValue: habit.requiredValue,
                         requiredType: habit.requiredType,
@@ -270,9 +273,9 @@ export default function Home() {
                 <Text className="text-gray-600 text-xs">{date.day}</Text>
                 <View
                   className={`w-8 h-8 rounded-full items-center justify-center ${
-                    date.selected ? "bg-blue-400" : "bg-transparent"
+                    date.dateObject.toDateString() === selectedDate.toDateString() ? "bg-blue-400" : "bg-transparent"
                   }`}>
-                  <Text className={`text-sm ${date.selected ? "text-blue-600 font-medium" : "text-gray-600"}`}>
+                  <Text className={`text-sm ${date.dateObject.toDateString() === selectedDate.toDateString() ? "text-blue-600 font-medium" : "text-gray-600"}`}>
                     {date.date}
                   </Text>
                 </View>
