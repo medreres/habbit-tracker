@@ -1,11 +1,11 @@
-import React, { useLayoutEffect, ReactNode } from "react";
+import React, { ReactNode, useCallback, useEffect } from "react";
 import { View, ScrollView, TextInput, Pressable, StatusBar } from "react-native";
 import { Text } from "@/components/ui/text";
 import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
 import { useNavigation, useRouter } from "expo-router";
 import { useHabbits } from "@/hooks/useHabbits";
-import { ChevronRight, Repeat, Target } from "lucide-react-native";
+import { ChevronRight } from "lucide-react-native";
 import { Icon } from "@/components/ui/icon";
 import { useHabitForm } from "@/contexts/HabitFormContext";
 import { locale } from "@/constants/locale";
@@ -43,17 +43,16 @@ export default function HabitFormModal() {
   // Helper function to format required value and type
   const formatRequiredValue = (value: number, type: string) => {
     const typeMap: { [key: string]: string } = {
-      'minutes': 'хв',
-      'hours': 'год',
-      'times': 'раз',
-      'liters': 'л'
+      minutes: "хв",
+      hours: "год",
+      times: "раз",
+      liters: "л",
     };
-    
     const typeText = typeMap[type] || type;
     return `${value} ${typeText}`;
   };
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     // Pass data back to previous screen
     await addHabit({
       name: formData.name,
@@ -62,17 +61,16 @@ export default function HabitFormModal() {
     });
     router.back();
     // You can also use router.setParams() to pass data back
-  };
-
-  const handleCancel = () => {
-    router.back();
-  };
+  }, [formData, addHabit, router]);
 
   // Set header buttons from the screen itself
-  useLayoutEffect(() => {
+  useEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
-        <Pressable onPress={handleCancel}>
+        <Pressable
+          onPress={() => {
+            router.back();
+          }}>
           <Text className="text-blue-500 text-base font-medium">Скасувати</Text>
         </Pressable>
       ),
@@ -82,7 +80,7 @@ export default function HabitFormModal() {
         </Pressable>
       ),
     });
-  }, [router]); // Re-run when form data changes
+  }, [router, handleSave]); // Re-run when form data changes
 
   const SelectionRow = ({
     icon,
@@ -140,24 +138,23 @@ export default function HabitFormModal() {
               onChangeText={(text) => updateFormData({ name: text })}
             />
           </HStack>
-          
-          <SelectionRow
+          {/* <SelectionRow
             icon={<Icon as={Repeat} />}
             label="ПОВТОРИТИ"
             value={formatSelectedDays(formData.selectedDays)}
             onPress={() => {
               router.push("/create-habbit/frequency");
             }}
-          />
+          /> */}
 
-          <SelectionRow
+          {/* <SelectionRow
             icon={<Icon as={Target} />}
             label="МЕТА"
             value={formatRequiredValue(formData.requiredValue, formData.requiredType)}
             onPress={() => {
               // router.push("/create-habbit/goal");
             }}
-          />
+          /> */}
 
           {/* 
           <SelectionRow
