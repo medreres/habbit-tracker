@@ -2,12 +2,6 @@ import React, { createContext, useContext, useState, ReactNode } from "react";
 
 interface HabitFormData {
   name: string;
-  goal: string;
-  timeOfDay: string;
-  reminder: string;
-  checklist: string;
-  startDate: string;
-  selectedDays: Map<string, boolean>;
   requiredValue: number;
   requiredType: 'minutes' | 'hours' | 'times' | 'liters';
 }
@@ -20,15 +14,6 @@ interface HabitFormContextType {
 
 const defaultFormData: HabitFormData = {
   name: "",
-  goal: "1 раз на день",
-  timeOfDay: "Будь-який час",
-  reminder: "09:00",
-  checklist: "Нічого",
-  startDate: "Сьогодні",
-  selectedDays: new Map(Array.from({ length: 7 }, (_, i) => {
-    const date = new Date(2024, 0, i + 7); // Using Jan 7-13 2024 to get all days
-    return [date.toLocaleDateString("en-US", { weekday: "long" }).toLowerCase(), true];
-  })),
   requiredValue: 1,
   requiredType: 'times',
 };

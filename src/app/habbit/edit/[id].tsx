@@ -170,7 +170,7 @@ export default function EditHabitScreen() {
             />
           </HStack>
           
-          <SelectionRow
+          {/* <SelectionRow
             icon={<Icon as={Repeat} />}
             label="ПОВТОРИТИ"
             value="Щодня"
@@ -178,16 +178,16 @@ export default function EditHabitScreen() {
               // TODO: Implement frequency selection
               Alert.alert("Інформація", "Частота звички зараз встановлена як 'щодня'");
             }}
-          />
+          /> */}
 
-          <SelectionRow
+          {/* <SelectionRow
             icon={<Icon as={Target} />}
             label="МЕТА"
             value={formatRequiredValue(formData.requiredValue, formData.requiredType)}
             onPress={() => {
               // TODO: Implement goal selection
               Alert.alert("Інформація", "Мета звички зараз встановлена як '1 раз на день'");
-            }}
+            }} */}
           />
 
           {/* Delete Button */}
