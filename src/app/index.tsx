@@ -15,6 +15,8 @@ import Reanimated, { SharedValue, useAnimatedStyle } from "react-native-reanimat
 import { Pressable } from "@/components/ui/pressable";
 import { HabbitRecordRepository } from "@/database/habbitRecordRepository";
 import { generateId } from "@/utils/idGenerator";
+import { useIsFocused } from "@react-navigation/native";
+import { isAfter } from "date-fns";
 
 export default function Home() {
   const router = useRouter();
@@ -24,15 +26,16 @@ export default function Home() {
     useMemo(() => habits.map((habit) => habit.id), [habits]),
     selectedDate
   );
+  const isFocused = useIsFocused()
 
   const dates = useMemo(() => {
     const today = new Date();
+    today.setDate(new Date().getDate() + 1)
     const datesArray = [];
 
-    // Generate last 7 days (including today)
-    for (let i = 12; i >= 0; i--) {
+    for (let i = 30; i >= 0; i--) {
       const date = new Date(today);
-      date.setDate(today.getDate() - i);
+      date.setDate(date.getDate() - i);
 
       const dayName = date.toLocaleDateString(locale, { weekday: "short" }).toUpperCase();
 
@@ -50,14 +53,8 @@ export default function Home() {
     }
 
     return datesArray;
-  }, []);
+  }, [isFocused]);
 
-  const handleSaveHabit = (habitData: any) => {
-    console.log("Saving habit:", habitData);
-    // Add your habit saving logic here
-  };
-
-  // Helper function to get progress text based on required type
   const getProgressText = (actualValue: number, requiredValue: number, requiredType: string) => {
     const typeMap: { [key: string]: string } = {
       minutes: "хв",
@@ -74,6 +71,10 @@ export default function Home() {
   const isHabitCompleted = (actualValue: number, requiredValue: number) => {
     return actualValue >= requiredValue;
   };
+
+  const selectedDateHabits = useMemo(() => {
+    return habits.filter((habit) => isAfter(selectedDate, habit.createdAt));
+  }, [habits, selectedDate]);
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -106,7 +107,7 @@ export default function Home() {
         <VStack
           space="md"
           className="px-4 py-2">
-          {habits.map((habit) => {
+          {selectedDateHabits.map((habit) => {
             // Filter records for this specific habit and selected date
             const habitRecords = records.filter((record) => record.habbitId === habit.id);
             const totalActualValue = habitRecords.reduce((sum, record) => sum + record.actualValue, 0);
@@ -213,8 +214,8 @@ export default function Home() {
                   <HStack
                     space="md"
                     className="items-center flex-1">
-                    <View className={`w-12 h-12 ${habit.color} rounded-full items-center justify-center`}>
-                      <Text className="text-white text-lg">{habit.icon}</Text>
+                    <View className={`w-12 h-12 bg-blue-500 rounded-full items-center justify-center`}>
+                      <Text className="text-white text-lg">Icon</Text>
                     </View>
                     <VStack space="xs">
                       <Text className={`text-black font-medium text-base ${isCompleted ? 'line-through' : ''}`}>{habit.name}</Text>

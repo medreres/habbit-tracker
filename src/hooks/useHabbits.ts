@@ -1,22 +1,24 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { generateId } from "@/utils/idGenerator";
+import { useMemo } from "react";
 
-export interface Habit {
+export interface HabitRecord {
   id: string;
+  // TODO add migrations for createdAt
+  createdAt: Date;
+
   name: string;
-  progress: string;
-  icon: string;
-  color: string;
-  buttonText: string;
-  buttonIcon: string;
   requiredValue: number;
   requiredType: string;
+};
+
+export type Habit = Pick<HabitRecord, "id" | "name" | "requiredType" | "requiredValue"> & {
+  createdAt: Date;
 }
 
 const HABITS_STORAGE_KEY = "habits";
 
-// API functions for AsyncStorage
 const habitsApi = {
   async getHabits(): Promise<Habit[]> {
     try {
@@ -41,23 +43,38 @@ const habitsApi = {
   },
 };
 
-export const useHabbits = () => {
+type UseHabbits = () => {
+  habits: Habit[];
+  deleteHabit: (id: string) => void;
+  addHabit: (habit: Pick<Habit, "name" | "requiredType" | "requiredValue">) => Promise<Habit>;
+};
+
+// TODO split adding and creating habbit
+export const useHabbits: UseHabbits = () => {
   const queryClient = useQueryClient();
 
-  // Query for fetching habits
-  const { data: habits = [], isLoading, error } = useQuery({
+  const { data: rawHabits = [] } = useQuery<Habit[]>({
     queryKey: ["habits"],
     queryFn: habitsApi.getHabits,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
   });
+
+  const habits = useMemo(() => {
+    return rawHabits.map((habit) => ({
+      ...habit,
+      createdAt: habit.createdAt ? new Date(habit.createdAt) : new Date(0),
+    }));
+  }, [rawHabits]);
 
   // Mutation for adding a habit
   const addHabitMutation = useMutation({
-    mutationFn: async (habit: Omit<Habit, "id">) => {
+    mutationFn: async (habit: Pick<Habit, "name" | "requiredType" | "requiredValue">) => {
       const newHabit: Habit = {
         ...habit,
         id: generateId(),
+        createdAt: new Date(),
       };
+      console.log('newHabit', newHabit)
       const updatedHabits = [...habits, newHabit];
       await habitsApi.saveHabits(updatedHabits);
       return newHabit;
@@ -67,21 +84,6 @@ export const useHabbits = () => {
     },
   });
 
-  // Mutation for updating a habit
-  const updateHabitMutation = useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Habit> }) => {
-      const updatedHabits = habits.map((habit) =>
-        habit.id === id ? { ...habit, ...updates } : habit
-      );
-      await habitsApi.saveHabits(updatedHabits);
-      return { id, updates };
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["habits"] });
-    },
-  });
-
-  // Mutation for deleting a habit
   const deleteHabitMutation = useMutation({
     mutationFn: async (id: string) => {
       const updatedHabits = habits.filter((habit) => habit.id !== id);
@@ -93,34 +95,18 @@ export const useHabbits = () => {
     },
   });
 
-  // Helper functions
-  const addHabit = (habit: Omit<Habit, "id">) => {
-    return addHabitMutation.mutateAsync(habit);
-  };
-
-  const updateHabit = (id: string, updates: Partial<Habit>) => {
-    updateHabitMutation.mutate({ id, updates });
-  };
-
   const deleteHabit = (id: string) => {
     deleteHabitMutation.mutate(id);
   };
 
-  const getHabitById = (id: string) => {
-    return habits.find((habit) => habit.id === id);
+   // Helper functions
+   const addHabit = (habit: Pick<Habit, "name" | "requiredType" | "requiredValue">) => {
+    return addHabitMutation.mutateAsync(habit);
   };
 
   return {
     habits,
-    isLoading,
-    error,
-    addHabit,
-    updateHabit,
     deleteHabit,
-    getHabitById,
-    // Mutation states for UI feedback
-    isAddingHabit: addHabitMutation.isPending,
-    isUpdatingHabit: updateHabitMutation.isPending,
-    isDeletingHabit: deleteHabitMutation.isPending,
+    addHabit,
   };
 };

@@ -57,11 +57,6 @@ export default function HabitFormModal() {
     // Pass data back to previous screen
     await addHabit({
       name: formData.name,
-      buttonIcon: "",
-      buttonText: "",
-      color: "bg-blue-500",
-      icon: "🎯",
-      progress: "",
       requiredValue: formData.requiredValue,
       requiredType: formData.requiredType,
     });
