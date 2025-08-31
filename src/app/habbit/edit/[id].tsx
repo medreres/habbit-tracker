@@ -14,13 +14,11 @@ export default function EditHabitScreen() {
   const navigation = useNavigation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { habits, updateHabit, deleteHabit } = useHabbits();
-  
-  const habit = habits.find(h => h.id === id);
-  
+  const habit = habits.find((h) => h.id === id);
   const [formData, setFormData] = useState({
     name: "",
     requiredValue: 1,
-    requiredType: 'times' as 'minutes' | 'hours' | 'times' | 'liters'
+    requiredType: "times" as "minutes" | "hours" | "times" | "liters",
   });
 
   useEffect(() => {
@@ -28,7 +26,7 @@ export default function EditHabitScreen() {
       setFormData({
         name: habit.name,
         requiredValue: habit.requiredValue,
-        requiredType: habit.requiredType as 'minutes' | 'hours' | 'times' | 'liters'
+        requiredType: habit.requiredType as "minutes" | "hours" | "times" | "liters",
       });
     }
   }, [habit]);
@@ -43,7 +41,7 @@ export default function EditHabitScreen() {
       await updateHabit(habit.id, {
         name: formData.name.trim(),
         requiredValue: formData.requiredValue,
-        requiredType: formData.requiredType
+        requiredType: formData.requiredType,
       });
       router.back();
     } catch (error) {
@@ -54,25 +52,21 @@ export default function EditHabitScreen() {
   const handleDelete = () => {
     if (!habit) return;
 
-    Alert.alert(
-      "Видалити звичку",
-      "Ви впевнені, що хочете видалити цю звичку? Це дія незворотна.",
-      [
-        { text: "Скасувати", style: "cancel" },
-        {
-          text: "Видалити",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              deleteHabit(habit.id);
-              router.back();
-            } catch (error) {
-              Alert.alert("Помилка", "Не вдалося видалити звичку");
-            }
+    Alert.alert("Видалити звичку", "Ви впевнені, що хочете видалити цю звичку? Це дія незворотна.", [
+      { text: "Скасувати", style: "cancel" },
+      {
+        text: "Видалити",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            deleteHabit(habit.id);
+            router.back();
+          } catch (error) {
+            Alert.alert("Помилка", "Не вдалося видалити звичку");
           }
-        }
-      ]
-    );
+        },
+      },
+    ]);
   };
 
   const handleCancel = () => {
@@ -82,12 +76,12 @@ export default function EditHabitScreen() {
   // Helper function to format required value and type
   const formatRequiredValue = (value: number, type: string) => {
     const typeMap: { [key: string]: string } = {
-      'minutes': 'хв',
-      'hours': 'год',
-      'times': 'раз',
-      'liters': 'л'
+      minutes: "хв",
+      hours: "год",
+      times: "раз",
+      liters: "л",
     };
-    
+
     const typeText = typeMap[type] || type;
     return `${value} ${typeText}`;
   };
@@ -166,10 +160,10 @@ export default function EditHabitScreen() {
               placeholder="Назва"
               placeholderTextColor="#9CA3AF"
               value={formData.name}
-              onChangeText={(text) => setFormData(prev => ({ ...prev, name: text }))}
+              onChangeText={(text) => setFormData((prev) => ({ ...prev, name: text }))}
             />
           </HStack>
-          
+
           {/* <SelectionRow
             icon={<Icon as={Repeat} />}
             label="ПОВТОРИТИ"
@@ -187,15 +181,15 @@ export default function EditHabitScreen() {
             onPress={() => {
               // TODO: Implement goal selection
               Alert.alert("Інформація", "Мета звички зараз встановлена як '1 раз на день'");
-            }} */}
-          />
+            }} 
+          />*/}
 
-          {/* Delete Button */}
+          {/* Delete Button
           <Pressable
             onPress={handleDelete}
             className="bg-red-50 p-4 rounded-lg border border-red-200">
             <Text className="text-red-600 text-center font-medium">Видалити звичку</Text>
-          </Pressable>
+          </Pressable> */}
         </VStack>
       </ScrollView>
     </>

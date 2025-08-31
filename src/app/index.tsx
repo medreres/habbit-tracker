@@ -113,7 +113,7 @@ export default function Home() {
       <ScrollView className="flex-1">
         <VStack
           space="md"
-          className="px-4 py-2">
+          className="py-2">
           {selectedDateHabits.map((habit) => {
             // Filter records for this specific habit and selected date
             const habitRecords = records.filter((record) => record.habbitId === habit.id);
@@ -283,10 +283,10 @@ export default function Home() {
 
       <HStack
         space="md"
-        className="px-4 py-4 items-center">
+        className="pr-4 py-4 items-center">
         <ScrollView
           horizontal
-          contentContainerClassName="gap-2"
+          contentContainerClassName="pl-4 gap-2"
           showsHorizontalScrollIndicator={false}
           contentOffset={{
             x: dates.length * 100,

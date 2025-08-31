@@ -66,19 +66,13 @@ export default function HabitFormModal() {
   // Set header buttons from the screen itself
   useEffect(() => {
     navigation.setOptions({
-      headerLeft: () => (
-        <Pressable
-          onPress={() => {
-            router.back();
-          }}>
-          <Text className="text-blue-500 text-base font-medium">Скасувати</Text>
-        </Pressable>
-      ),
       headerRight: () => (
         <Pressable onPress={handleSave}>
           <Text className="text-blue-500 text-base font-medium">Зберегти</Text>
         </Pressable>
       ),
+      headerBackButtonDisplayMode: "minimal",
+      headerBackVisible: true,
     });
   }, [router, handleSave]); // Re-run when form data changes
 
@@ -131,7 +125,7 @@ export default function HabitFormModal() {
               <Text className="text-red-500 text-lg">❓</Text>
             </View>
             <TextInput
-              className="flex-1 text-base text-black"
+              className="flex-1"
               placeholder="Назва"
               placeholderTextColor="#9CA3AF"
               value={formData.name}
