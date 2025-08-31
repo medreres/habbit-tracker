@@ -1,43 +1,82 @@
-import React, { useLayoutEffect, ReactNode } from "react";
-import { View, ScrollView, TextInput, Pressable, StatusBar } from "react-native";
+import React, { useLayoutEffect, useState, useEffect } from "react";
+import { View, ScrollView, TextInput, Pressable, StatusBar, Alert } from "react-native";
 import { Text } from "@/components/ui/text";
 import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
-import { useNavigation, useRouter } from "expo-router";
+import { useNavigation, useRouter, useLocalSearchParams } from "expo-router";
 import { useHabbits } from "@/hooks/useHabbits";
 import { ChevronRight, Repeat, Target } from "lucide-react-native";
 import { Icon } from "@/components/ui/icon";
-import { useHabitForm } from "@/contexts/HabitFormContext";
 import { locale } from "@/constants/locale";
 
-export default function HabitFormModal() {
+export default function EditHabitScreen() {
   const router = useRouter();
   const navigation = useNavigation();
-  const { addHabit } = useHabbits();
-  const { formData, updateFormData } = useHabitForm();
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const { habits, updateHabit, deleteHabit } = useHabbits();
+  
+  const habit = habits.find(h => h.id === id);
+  
+  const [formData, setFormData] = useState({
+    name: "",
+    requiredValue: 1,
+    requiredType: 'times' as 'minutes' | 'hours' | 'times' | 'liters'
+  });
 
-  // Helper function to format day names using Intl API
-  const formatSelectedDays = (selectedDays: Map<string, boolean>) => {
-    if (Array.from(selectedDays.values()).filter(Boolean).length === 7) {
-      return "Щодня";
+  useEffect(() => {
+    if (habit) {
+      setFormData({
+        name: habit.name,
+        requiredValue: habit.requiredValue,
+        requiredType: habit.requiredType as 'minutes' | 'hours' | 'times' | 'liters'
+      });
+    }
+  }, [habit]);
+
+  const handleSave = async () => {
+    if (!habit || !formData.name.trim()) {
+      Alert.alert("Помилка", "Будь ласка, введіть назву звички");
+      return;
     }
 
-    const formatter = new Intl.DateTimeFormat(locale, { weekday: "short" });
+    try {
+      await updateHabit(habit.id, {
+        name: formData.name.trim(),
+        requiredValue: formData.requiredValue,
+        requiredType: formData.requiredType
+      });
+      router.back();
+    } catch (error) {
+      Alert.alert("Помилка", "Не вдалося оновити звичку");
+    }
+  };
 
-    const dayMap: { [key: string]: Date } = {
-      monday: new Date(2024, 0, 1), // Monday
-      tuesday: new Date(2024, 0, 2), // Tuesday
-      wednesday: new Date(2024, 0, 3), // Wednesday
-      thursday: new Date(2024, 0, 4), // Thursday
-      friday: new Date(2024, 0, 5), // Friday
-      saturday: new Date(2024, 0, 6), // Saturday
-      sunday: new Date(2024, 0, 7), // Sunday
-    };
+  const handleDelete = () => {
+    if (!habit) return;
 
-    return Array.from(selectedDays.entries())
-      .filter(([_, value]) => value)
-      .map(([key]) => formatter.format(dayMap[key]))
-      .join(", ");
+    Alert.alert(
+      "Видалити звичку",
+      "Ви впевнені, що хочете видалити цю звичку? Це дія незворотна.",
+      [
+        { text: "Скасувати", style: "cancel" },
+        {
+          text: "Видалити",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              deleteHabit(habit.id);
+              router.back();
+            } catch (error) {
+              Alert.alert("Помилка", "Не вдалося видалити звичку");
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  const handleCancel = () => {
+    router.back();
   };
 
   // Helper function to format required value and type
@@ -53,22 +92,6 @@ export default function HabitFormModal() {
     return `${value} ${typeText}`;
   };
 
-  const handleSave = async () => {
-    // Pass data back to previous screen
-    await addHabit({
-      name: formData.name,
-      requiredValue: formData.requiredValue,
-      requiredType: formData.requiredType,
-    });
-    router.back();
-    // You can also use router.setParams() to pass data back
-  };
-
-  const handleCancel = () => {
-    router.back();
-  };
-
-  // Set header buttons from the screen itself
   useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
@@ -82,7 +105,15 @@ export default function HabitFormModal() {
         </Pressable>
       ),
     });
-  }, [router]); // Re-run when form data changes
+  }, [navigation, formData.name]);
+
+  if (!habit) {
+    return (
+      <View className="flex-1 bg-white justify-center items-center">
+        <Text className="text-gray-500">Habit not found</Text>
+      </View>
+    );
+  }
 
   const SelectionRow = ({
     icon,
@@ -90,7 +121,7 @@ export default function HabitFormModal() {
     value,
     onPress,
   }: {
-    icon: ReactNode;
+    icon: React.ReactNode;
     label: string;
     value: string;
     onPress: () => void;
@@ -121,8 +152,6 @@ export default function HabitFormModal() {
   return (
     <>
       <StatusBar barStyle="dark-content" />
-
-      {/* Content */}
       <ScrollView className="flex-1 px-4 py-4">
         <VStack space="md">
           {/* Name Input */}
@@ -137,16 +166,17 @@ export default function HabitFormModal() {
               placeholder="Назва"
               placeholderTextColor="#9CA3AF"
               value={formData.name}
-              onChangeText={(text) => updateFormData({ name: text })}
+              onChangeText={(text) => setFormData(prev => ({ ...prev, name: text }))}
             />
           </HStack>
           
           <SelectionRow
             icon={<Icon as={Repeat} />}
             label="ПОВТОРИТИ"
-            value={formatSelectedDays(formData.selectedDays)}
+            value="Щодня"
             onPress={() => {
-              router.push("/create-habbit/frequency");
+              // TODO: Implement frequency selection
+              Alert.alert("Інформація", "Частота звички зараз встановлена як 'щодня'");
             }}
           />
 
@@ -155,46 +185,17 @@ export default function HabitFormModal() {
             label="МЕТА"
             value={formatRequiredValue(formData.requiredValue, formData.requiredType)}
             onPress={() => {
-              // router.push("/create-habbit/goal");
+              // TODO: Implement goal selection
+              Alert.alert("Інформація", "Мета звички зараз встановлена як '1 раз на день'");
             }}
           />
 
-          {/* 
-          <SelectionRow
-            icon="☀️"
-            label="ЧАС ДНЯ"
-            value={formData.timeOfDay}
-            onPress={() => {
-              router.push("/time-selection");
-            }}
-          />
-
-          <SelectionRow
-            icon=""
-            label="НАГАДУВАННЯ"
-            value={formData.reminder}
-            onPress={() => {
-              router.push("/reminder-selection");
-            }}
-          />
-
-          <SelectionRow
-            icon=""
-            label="ЧЕК-ЛИСТ"
-            value={formData.checklist}
-            onPress={() => {
-              router.push("/checklist-selection");
-            }}
-          />
-
-          <SelectionRow
-            icon=""
-            label="ДАТА ПОЧАТКУ"
-            value={formData.startDate}
-            onPress={() => {
-              router.push("/date-selection");
-            }}
-          /> */}
+          {/* Delete Button */}
+          <Pressable
+            onPress={handleDelete}
+            className="bg-red-50 p-4 rounded-lg border border-red-200">
+            <Text className="text-red-600 text-center font-medium">Видалити звичку</Text>
+          </Pressable>
         </VStack>
       </ScrollView>
     </>

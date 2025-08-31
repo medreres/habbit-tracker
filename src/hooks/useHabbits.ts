@@ -47,6 +47,7 @@ type UseHabbits = () => {
   habits: Habit[];
   deleteHabit: (id: string) => void;
   addHabit: (habit: Pick<Habit, "name" | "requiredType" | "requiredValue">) => Promise<Habit>;
+  updateHabit: (id: string, updates: Partial<Pick<Habit, "name" | "requiredType" | "requiredValue">>) => Promise<void>;
 };
 
 // TODO split adding and creating habbit
@@ -99,6 +100,23 @@ export const useHabbits: UseHabbits = () => {
     deleteHabitMutation.mutate(id);
   };
 
+  // Update habit mutation
+  const updateHabitMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Pick<Habit, "name" | "requiredType" | "requiredValue">> }) => {
+      const updatedHabits = habits.map(habit => 
+        habit.id === id ? { ...habit, ...updates } : habit
+      );
+      await habitsApi.saveHabits(updatedHabits);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["habits"] });
+    },
+  });
+
+  const updateHabit = (id: string, updates: Partial<Pick<Habit, "name" | "requiredType" | "requiredValue">>) => {
+    return updateHabitMutation.mutateAsync({ id, updates });
+  };
+
    // Helper functions
    const addHabit = (habit: Pick<Habit, "name" | "requiredType" | "requiredValue">) => {
     return addHabitMutation.mutateAsync(habit);
@@ -108,5 +126,6 @@ export const useHabbits: UseHabbits = () => {
     habits,
     deleteHabit,
     addHabit,
+    updateHabit,
   };
 };

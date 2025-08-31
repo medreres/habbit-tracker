@@ -5,12 +5,17 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useLayoutEffect, useState } from "react";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import { useColorScheme } from "@/components/useColorScheme";
-import { Slot, Stack } from "expo-router";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { router, Slot, Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { GestureHandlerRootView, Pressable } from "react-native-gesture-handler";
 
 import "../global.css";
 import { QueryProvider } from "../components/query-provider";
 import { useDatabase } from "@/hooks/useDatabase";
+import { HStack } from "@/components/ui/hstack";
+import { ChevronLeft, Edit3, MoreVertical } from "lucide-react-native";
+import { Text } from "@/components/ui/text";
+import { Icon } from "@/components/ui/icon";
+import { TouchableOpacity } from "react-native";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -24,7 +29,6 @@ export {
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
-
 
 export default function RootLayout() {
   const { isInitialized, error: dbError } = useDatabase();
@@ -71,6 +75,12 @@ function RootLayoutNav() {
               options={{
                 presentation: "modal",
                 headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="habbit/[id]"
+              options={{
+                presentation: "modal",
               }}
             />
           </Stack>

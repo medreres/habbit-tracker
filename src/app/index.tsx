@@ -26,11 +26,11 @@ export default function Home() {
     useMemo(() => habits.map((habit) => habit.id), [habits]),
     selectedDate
   );
-  const isFocused = useIsFocused()
+  const isFocused = useIsFocused();
 
   const dates = useMemo(() => {
     const today = new Date();
-    today.setDate(new Date().getDate() + 1)
+    today.setDate(new Date().getDate() + 1);
     const datesArray = [];
 
     for (let i = 30; i >= 0; i--) {
@@ -83,7 +83,14 @@ export default function Home() {
         space="md"
         className="px-4 py-2">
         <Text className="text-gray-500 text-sm uppercase tracking-wide">
-          {selectedDate.toDateString() === new Date().toDateString() ? "СЬОГОДНІ" : selectedDate.toLocaleDateString(locale, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+          {selectedDate.toDateString() === new Date().toDateString()
+            ? "СЬОГОДНІ"
+            : selectedDate.toLocaleDateString(locale, {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
         </Text>
         <HStack className="justify-between items-center">
           <HStack
@@ -207,62 +214,67 @@ export default function Home() {
                     </Reanimated.View>
                   );
                 }}>
-                <HStack
-                  className={`justify-between items-center p-4 rounded-lg ${
-                    isCompleted ? "bg-gray-200" : "bg-gray-50"
-                  }`}>
+                <TouchableOpacity onPress={() => router.push(`/habbit/${habit.id}`)}>
                   <HStack
-                    space="md"
-                    className="items-center flex-1">
-                    <View className={`w-12 h-12 bg-blue-500 rounded-full items-center justify-center`}>
-                      <Text className="text-white text-lg">Icon</Text>
-                    </View>
-                    <VStack space="xs">
-                      <Text className={`text-black font-medium text-base ${isCompleted ? 'line-through' : ''}`}>{habit.name}</Text>
-                      <Text className="text-gray-500 text-sm">{progressText}</Text>
-                    </VStack>
-                  </HStack>
-                  <Button
-                    onPress={async () => {
-                      if (isCompleted) {
-                        // If habit is completed, cancel the most recent record
-                        const habitRecords = records.filter((record) => record.habbitId === habit.id);
-                        
-                        if (habitRecords.length > 0) {
-                          const mostRecentRecord = habitRecords[habitRecords.length - 1];
-                          
-                          try {
-                            await HabbitRecordRepository.delete(mostRecentRecord.id);
-                            await refetch();
-                            console.log("Habbit record cancelled");
-                          } catch (error) {
-                            console.error("Error cancelling habbit record:", error);
-                          }
-                        }
-                      } else {
-                        // If habit is not completed, create a new record
-                        console.log("habit", habit);
-                        await HabbitRecordRepository.create({
-                          id: generateId(),
-                          actualValue: 1,
-                          completedAt: selectedDate,
-                          habbitId: habit.id,
-                          requiredValue: habit.requiredValue,
-                          requiredType: habit.requiredType,
-                        });
-
-                        await refetch();
-                        console.log("Habbit record created");
-                      }
-                    }}
-                    className={`px-4 py-2 rounded-full ${isCompleted ? "bg-gray-400" : "bg-blue-400"}`}>
+                    className={`justify-between items-center p-4 rounded-lg ${
+                      isCompleted ? "bg-gray-200" : "bg-gray-50"
+                    }`}>
                     <HStack
-                      space="sm"
-                      className="items-center">
-                      <Text className="text-white text-sm font-medium">{isCompleted ? "Виконано" : "Виконати"}</Text>
+                      space="md"
+                      className="items-center flex-1">
+                      <View className={`w-12 h-12 bg-blue-500 rounded-full items-center justify-center`}>
+                        <Text className="text-white text-lg">Icon</Text>
+                      </View>
+                      <VStack space="xs">
+                        <Text className={`text-black font-medium text-base ${isCompleted ? "line-through" : ""}`}>
+                          {habit.name}
+                        </Text>
+                        <Text className="text-gray-500 text-sm">{progressText}</Text>
+                      </VStack>
                     </HStack>
-                  </Button>
-                </HStack>
+
+                    <Button
+                      onPress={async () => {
+                        if (isCompleted) {
+                          // If habit is completed, cancel the most recent record
+                          const habitRecords = records.filter((record) => record.habbitId === habit.id);
+
+                          if (habitRecords.length > 0) {
+                            const mostRecentRecord = habitRecords[habitRecords.length - 1];
+
+                            try {
+                              await HabbitRecordRepository.delete(mostRecentRecord.id);
+                              await refetch();
+                              console.log("Habbit record cancelled");
+                            } catch (error) {
+                              console.error("Error cancelling habbit record:", error);
+                            }
+                          }
+                        } else {
+                          // If habit is not completed, create a new record
+                          console.log("habit", habit);
+                          await HabbitRecordRepository.create({
+                            id: generateId(),
+                            actualValue: 1,
+                            completedAt: selectedDate,
+                            habbitId: habit.id,
+                            requiredValue: habit.requiredValue,
+                            requiredType: habit.requiredType,
+                          });
+
+                          await refetch();
+                          console.log("Habbit record created");
+                        }
+                      }}
+                      className={`px-4 py-2 rounded-full ${isCompleted ? "bg-gray-400" : "bg-blue-400"}`}>
+                      <HStack
+                        space="sm"
+                        className="items-center">
+                        <Text className="text-white text-sm font-medium">{isCompleted ? "Виконано" : "Виконати"}</Text>
+                      </HStack>
+                    </Button>
+                  </HStack>
+                </TouchableOpacity>
               </Swipeable>
             );
           })}
@@ -293,7 +305,12 @@ export default function Home() {
                   className={`w-8 h-8 rounded-full items-center justify-center ${
                     date.dateObject.toDateString() === selectedDate.toDateString() ? "bg-blue-400" : "bg-transparent"
                   }`}>
-                  <Text className={`text-sm ${date.dateObject.toDateString() === selectedDate.toDateString() ? "text-blue-600 font-medium" : "text-gray-600"}`}>
+                  <Text
+                    className={`text-sm ${
+                      date.dateObject.toDateString() === selectedDate.toDateString()
+                        ? "text-blue-600 font-medium"
+                        : "text-gray-600"
+                    }`}>
                     {date.date}
                   </Text>
                 </View>

@@ -14,7 +14,7 @@ export const useHabbitRecords = (habbitIds: string[], date: Date): UseHabbitReco
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchRecords = async () => {
+  const fetchRecords = async (habbitIds: string[], date: Date) => {
     try {
       setLoading(true);
       setError(null);
@@ -27,14 +27,18 @@ export const useHabbitRecords = (habbitIds: string[], date: Date): UseHabbitReco
     }
   };
 
+  const refetch = async () => {
+    fetchRecords(habbitIds, date);
+  };
+
   useEffect(() => {
-    fetchRecords();
-  }, [habbitIds, date.toISOString()]);
+    fetchRecords(habbitIds, date);
+  }, [habbitIds, date.getTime()]);
 
   return {
     records,
     loading,
     error,
-    refetch: fetchRecords,
+    refetch,
   };
 }; 
