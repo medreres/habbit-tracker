@@ -5,8 +5,7 @@ import { useMemo } from "react";
 
 export interface HabitRecord {
   id: string;
-  // TODO add migrations for createdAt
-  createdAt: Date;
+  createdAt?: Date;
 
   name: string;
   requiredValue: number;
