@@ -16,23 +16,13 @@ export default function HabitFormModal() {
   const { addHabit } = useHabbits();
   const { formData, updateFormData } = useHabitForm();
 
-  // Helper function to format day names using Intl API
-  const formatSelectedDays = (selectedDays: Map<string, boolean>) => {
+  const formatSelectedDays = (selectedDays: Date[]) => {
     if (Array.from(selectedDays.values()).filter(Boolean).length === 7) {
       return "Щодня";
     }
 
     const formatter = new Intl.DateTimeFormat(locale, { weekday: "short" });
 
-    const dayMap: { [key: string]: Date } = {
-      monday: new Date(2024, 0, 1), // Monday
-      tuesday: new Date(2024, 0, 2), // Tuesday
-      wednesday: new Date(2024, 0, 3), // Wednesday
-      thursday: new Date(2024, 0, 4), // Thursday
-      friday: new Date(2024, 0, 5), // Friday
-      saturday: new Date(2024, 0, 6), // Saturday
-      sunday: new Date(2024, 0, 7), // Sunday
-    };
 
     return Array.from(selectedDays.entries())
       .filter(([_, value]) => value)
@@ -43,12 +33,11 @@ export default function HabitFormModal() {
   // Helper function to format required value and type
   const formatRequiredValue = (value: number, type: string) => {
     const typeMap: { [key: string]: string } = {
-      'minutes': 'хв',
-      'hours': 'год',
-      'times': 'раз',
-      'liters': 'л'
+      minutes: "хв",
+      hours: "год",
+      times: "раз",
+      liters: "л",
     };
-    
     const typeText = typeMap[type] || type;
     return `${value} ${typeText}`;
   };
@@ -140,11 +129,10 @@ export default function HabitFormModal() {
               onChangeText={(text) => updateFormData({ name: text })}
             />
           </HStack>
-          
           <SelectionRow
             icon={<Icon as={Repeat} />}
             label="ПОВТОРИТИ"
-            value={formatSelectedDays(formData.selectedDays)}
+            value={formatSelectedDays(formData.frequency.value)}
             onPress={() => {
               router.push("/create-habbit/frequency");
             }}

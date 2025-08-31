@@ -1,36 +1,39 @@
+import { formatWeekday } from "@/utils/formatWeekday";
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
 interface HabitFormData {
   name: string;
-  goal: string;
-  timeOfDay: string;
-  reminder: string;
-  checklist: string;
-  startDate: string;
-  selectedDays: Map<string, boolean>;
   requiredValue: number;
-  requiredType: 'minutes' | 'hours' | 'times' | 'liters';
+  requiredType: "minutes" | "hours" | "times" | "liters";
+  frequency: {
+    unit: "day";
+    value: string[];
+  };
 }
 
 interface HabitFormContextType {
   formData: HabitFormData;
   updateFormData: (updates: Partial<HabitFormData>) => void;
   resetFormData: () => void;
-}
+};
+
+export const WEEK_DAYS = Array.from({ length: 7 }, (_, i) => {
+  const date = new Date(2024, 0, i + 7); // Using Jan 7-13 2024 to get all days
+  return {
+    key: date.toLocaleDateString("en-US", { weekday: "long" }).toLowerCase(),
+    value: date,
+    label: date.toLocaleDateString("uk-UA", { weekday: "long" }),
+  };
+});
 
 const defaultFormData: HabitFormData = {
   name: "",
-  goal: "1 раз на день",
-  timeOfDay: "Будь-який час",
-  reminder: "09:00",
-  checklist: "Нічого",
-  startDate: "Сьогодні",
-  selectedDays: new Map(Array.from({ length: 7 }, (_, i) => {
-    const date = new Date(2024, 0, i + 7); // Using Jan 7-13 2024 to get all days
-    return [date.toLocaleDateString("en-US", { weekday: "long" }).toLowerCase(), true];
-  })),
+  frequency: {
+    unit: "day",
+    value: WEEK_DAYS.map((day) => formatWeekday(day.value))
+  },
   requiredValue: 1,
-  requiredType: 'times',
+  requiredType: "times",
 };
 
 const HabitFormContext = createContext<HabitFormContextType | undefined>(undefined);

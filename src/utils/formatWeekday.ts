@@ -1,0 +1,1 @@
+export const formatWeekday = new Intl.DateTimeFormat('en-US', { weekday: 'short' }).format;

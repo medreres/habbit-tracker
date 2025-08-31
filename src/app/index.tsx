@@ -16,7 +16,7 @@ import { Pressable } from "@/components/ui/pressable";
 import { HabbitRecordRepository } from "@/database/habbitRecordRepository";
 import { generateId } from "@/utils/idGenerator";
 import { useIsFocused } from "@react-navigation/native";
-import { isAfter } from "date-fns";
+import { isAfter, startOfDay } from "date-fns";
 
 export default function Home() {
   const router = useRouter();
@@ -73,7 +73,7 @@ export default function Home() {
   };
 
   const selectedDateHabits = useMemo(() => {
-    return habits.filter((habit) => isAfter(selectedDate, habit.createdAt));
+    return habits.filter((habit) => isAfter(selectedDate, startOfDay(habit.createdAt)));
   }, [habits, selectedDate]);
 
   return (

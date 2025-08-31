@@ -11,6 +11,10 @@ export interface HabitRecord {
   name: string;
   requiredValue: number;
   requiredType: string;
+
+  frequency: {
+    days?: string[]
+  }
 };
 
 export type Habit = Pick<HabitRecord, "id" | "name" | "requiredType" | "requiredValue"> & {

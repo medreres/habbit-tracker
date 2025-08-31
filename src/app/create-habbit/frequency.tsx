@@ -9,15 +9,8 @@ import { Divider } from "@/components/ui/divider";
 import { Icon } from "@/components/ui/icon";
 import { Check } from "lucide-react-native";
 import { useRouter } from "expo-router";
-import { useHabitForm } from "@/contexts/HabitFormContext";
+import { useHabitForm, WEEK_DAYS } from "@/contexts/HabitFormContext";
 
-const days = Array.from({ length: 7 }, (_, i) => {
-  const date = new Date(2024, 0, i + 7); // Using Jan 7-13 2024 to get all days
-  return {
-    key: date.toLocaleDateString("en-US", { weekday: "long" }).toLowerCase(),
-    label: date.toLocaleDateString("uk-UA", { weekday: "long" }),
-  };
-});
 
 export default function Frequency() {
   const router = useRouter();
@@ -31,11 +24,8 @@ export default function Frequency() {
   ];
 
   const toggleDay = (dayKey: string) => {
-    const newSelectedDays = new Map(formData.selectedDays);
-    const newValue = !newSelectedDays.get(dayKey);
-    newSelectedDays.set(dayKey, newValue);
+   
 
-    console.log('newSelectedDays', newSelectedDays)
 
     updateFormData({
       selectedDays: newSelectedDays,
@@ -71,8 +61,8 @@ export default function Frequency() {
       {/* Days List */}
       <ScrollView className="flex-1">
         <VStack className="bg-white">
-          {days.map((day, index) => {
-            const isSelected = formData.selectedDays.get(day.key);
+          {WEEK_DAYS.map((day, index, days) => {
+            const isSelected = formData.frequency.value.includes(day.key)
             return (
               <Box key={day.key}>
                 <Pressable
