@@ -8,7 +8,8 @@
     "ios": "DARK_MODE=media expo start --ios",
     "web": "DARK_MODE=media expo start --web",
     "test": "jest --watchAll",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "build:ios:preview": "eas build --profile preview --platform ios"
   },
   "jest": {
     "preset": "jest-expo"

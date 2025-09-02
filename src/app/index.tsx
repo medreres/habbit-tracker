@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import * as Haptics from 'expo-haptics'
 import { View, ScrollView, Alert, TouchableOpacity } from "react-native";
 import { Text } from "@/components/ui/text";
 import { SafeAreaView } from "@/components/ui/safe-area-view";
@@ -235,6 +236,7 @@ export default function Home() {
 
                     <Button
                       onPress={async () => {
+                        await Haptics.selectionAsync()
                         if (isCompleted) {
                           // If habit is completed, cancel the most recent record
                           const habitRecords = records.filter((record) => record.habbitId === habit.id);
