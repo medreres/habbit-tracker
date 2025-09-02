@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { generateId } from "@/utils/idGenerator";
 import { useMemo } from "react";
+import { FREQUENCY, RepeatType } from "@/contexts/constants";
 
 export interface HabitRecord {
   id: string;
@@ -10,10 +11,15 @@ export interface HabitRecord {
   name: string;
   requiredValue: number;
   requiredType: string;
+  frequency?: {
+    type: RepeatType.Daily;
+    selectedDays: string[];
+  }
 };
 
 export type Habit = Pick<HabitRecord, "id" | "name" | "requiredType" | "requiredValue"> & {
   createdAt: Date;
+  frequency: NonNullable<HabitRecord['frequency']>
 }
 
 const HABITS_STORAGE_KEY = "habits";
@@ -45,30 +51,31 @@ const habitsApi = {
 type UseHabbits = () => {
   habits: Habit[];
   deleteHabit: (id: string) => void;
-  addHabit: (habit: Pick<Habit, "name" | "requiredType" | "requiredValue">) => Promise<Habit>;
-  updateHabit: (id: string, updates: Partial<Pick<Habit, "name" | "requiredType" | "requiredValue">>) => Promise<void>;
+  addHabit: (habit: Pick<Habit, "name" | "requiredType" | "requiredValue" | "frequency">) => Promise<Habit>;
+  updateHabit: (id: string, updates: Partial<Pick<Habit, "name" | "requiredType" | "requiredValue" | "frequency">>) => Promise<void>;
 };
 
 // TODO split adding and creating habbit
 export const useHabbits: UseHabbits = () => {
   const queryClient = useQueryClient();
 
-  const { data: rawHabits = [] } = useQuery<Habit[]>({
+  const { data: rawHabits = [] } = useQuery<HabitRecord[]>({
     queryKey: ["habits"],
     queryFn: habitsApi.getHabits,
     staleTime: 1000 * 60 * 5,
   });
 
-  const habits = useMemo(() => {
+  const habits: Habit[] = useMemo(() => {
     return rawHabits.map((habit) => ({
       ...habit,
+      frequency: habit.frequency ?? { type: RepeatType.Daily, selectedDays: FREQUENCY.daily.options.map((option) => option.value) },
       createdAt: habit.createdAt ? new Date(habit.createdAt) : new Date(0),
     }));
   }, [rawHabits]);
 
   // Mutation for adding a habit
   const addHabitMutation = useMutation({
-    mutationFn: async (habit: Pick<Habit, "name" | "requiredType" | "requiredValue">) => {
+    mutationFn: async (habit: Pick<Habit, "name" | "requiredType" | "requiredValue" | "frequency">) => {
       const newHabit: Habit = {
         ...habit,
         id: generateId(),
@@ -117,7 +124,7 @@ export const useHabbits: UseHabbits = () => {
   };
 
    // Helper functions
-   const addHabit = (habit: Pick<Habit, "name" | "requiredType" | "requiredValue">) => {
+   const addHabit = (habit: Pick<Habit, "name" | "requiredType" | "requiredValue" | "frequency">) => {
     return addHabitMutation.mutateAsync(habit);
   };
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import * as Haptics from 'expo-haptics'
 import { View, ScrollView, Alert, TouchableOpacity } from "react-native";
 import { Text } from "@/components/ui/text";
@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useMemo } from "react";
 import { locale } from "@/constants/locale";
 import { useRouter } from "expo-router";
-import { useHabbits } from "@/hooks/useHabbits";
+import { Habit, useHabbits } from "@/hooks/useHabbits";
 import { useHabbitRecords } from "@/hooks/useHabbitRecords";
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import Reanimated, { SharedValue, useAnimatedStyle } from "react-native-reanimated";
@@ -56,7 +56,7 @@ export default function Home() {
     return datesArray;
   }, [isFocused]);
 
-  const getProgressText = (actualValue: number, requiredValue: number, requiredType: string) => {
+  const getProgressText = useCallback((actualValue: number, requiredValue: number, requiredType: string) => {
     const typeMap: { [key: string]: string } = {
       minutes: "хв",
       hours: "год",
@@ -66,15 +66,27 @@ export default function Home() {
 
     const typeText = typeMap[requiredType] || requiredType;
     return `${actualValue}/${requiredValue} ${typeText}`;
-  };
+  }, []);
 
   // Helper function to check if habit is completed
-  const isHabitCompleted = (actualValue: number, requiredValue: number) => {
+  const isHabitCompleted = useCallback((actualValue: number, requiredValue: number) => {
     return actualValue >= requiredValue;
-  };
+  }, []);
 
   const selectedDateHabits = useMemo(() => {
-    return habits.filter((habit) => isAfter(selectedDate, startOfDay(habit.createdAt)));
+    const isHabitCreatedForSelectedDate = (habbit: Habit) => isAfter(selectedDate, startOfDay(habbit.createdAt))
+
+    const isHabitFrequencyMatchesSelectedDate = (habbit: Habit) => {
+      const selectedDateString = selectedDate.toLocaleDateString('en-US', { weekday: "long" }).toLowerCase();
+      console.log(`selectedDate.toLocaleDateString(locale, { weekday: "short" }`, selectedDateString);
+      return habbit.frequency.selectedDays.includes(selectedDateString);
+    }
+
+    const checks: ((habbit: Habit) => boolean)[] = [
+      isHabitCreatedForSelectedDate,
+      isHabitFrequencyMatchesSelectedDate
+    ]
+    return habits.filter((habit) => checks.every((check) => check(habit)));
   }, [habits, selectedDate]);
 
   return (
@@ -253,6 +265,12 @@ export default function Home() {
                             }
                           }
                         } else {
+
+                          if (isAfter(selectedDate, new Date())) {
+                            Alert.alert("Помилка", "Ви не можете виконати звичку для майбутніх дат");
+                            await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+                            return;
+                          }
                           // If habit is not completed, create a new record
                           console.log("habit", habit);
                           await HabbitRecordRepository.create({

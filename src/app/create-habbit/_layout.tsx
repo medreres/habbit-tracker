@@ -1,26 +1,26 @@
-import { router, Stack } from "expo-router";
+import { Stack } from "expo-router";
 import { HabitFormProvider } from "@/contexts/HabitFormContext";
-import { Pressable } from "react-native";
-import { Text } from "@/components/ui/text";
 
 export default function CreateHabbitLayout() {
   return (
     <HabitFormProvider>
       <Stack
         screenOptions={{
-          headerLeft: () => (
-            <Pressable
-              onPress={() => {
-                router.back();
-              }}>
-              <Text className="text-blue-500 text-base font-medium">Скасувати</Text>
-            </Pressable>
-          ),
+          headerBackVisible: true,
+          headerBackTitle: "Назад",
         }}>
-        <Stack.Screen name="index" />
+        <Stack.Screen
+          name="index"
+          options={{
+            title: "Створити звичку",
+            // TODO create ios like header right action to save
+          }}
+        />
         <Stack.Screen
           name="frequency"
-          options={{}}
+          options={{
+            title: "Частота",
+          }}
         />
       </Stack>
     </HabitFormProvider>

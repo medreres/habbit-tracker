@@ -1,22 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
-
-interface HabitFormData {
-  name: string;
-  requiredValue: number;
-  requiredType: 'minutes' | 'hours' | 'times' | 'liters';
-}
-
-interface HabitFormContextType {
-  formData: HabitFormData;
-  updateFormData: (updates: Partial<HabitFormData>) => void;
-  resetFormData: () => void;
-}
-
-const defaultFormData: HabitFormData = {
-  name: "",
-  requiredValue: 1,
-  requiredType: 'times',
-};
+import { defaultFormData } from "./constants";
+import { HabitFormContextType, HabitFormData } from "./types";
 
 const HabitFormContext = createContext<HabitFormContextType | undefined>(undefined);
 

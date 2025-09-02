@@ -5,10 +5,11 @@ import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
 import { useNavigation, useRouter } from "expo-router";
 import { useHabbits } from "@/hooks/useHabbits";
-import { ChevronRight } from "lucide-react-native";
+import { ChevronRight, Repeat } from "lucide-react-native";
 import { Icon } from "@/components/ui/icon";
 import { useHabitForm } from "@/contexts/HabitFormContext";
 import { locale } from "@/constants/locale";
+import { FREQUENCY } from "@/contexts/constants";
 
 export default function HabitFormModal() {
   const router = useRouter();
@@ -16,48 +17,13 @@ export default function HabitFormModal() {
   const { addHabit } = useHabbits();
   const { formData, updateFormData } = useHabitForm();
 
-  // Helper function to format day names using Intl API
-  const formatSelectedDays = (selectedDays: Map<string, boolean>) => {
-    if (Array.from(selectedDays.values()).filter(Boolean).length === 7) {
-      return "Щодня";
-    }
-
-    const formatter = new Intl.DateTimeFormat(locale, { weekday: "short" });
-
-    const dayMap: { [key: string]: Date } = {
-      monday: new Date(2024, 0, 1), // Monday
-      tuesday: new Date(2024, 0, 2), // Tuesday
-      wednesday: new Date(2024, 0, 3), // Wednesday
-      thursday: new Date(2024, 0, 4), // Thursday
-      friday: new Date(2024, 0, 5), // Friday
-      saturday: new Date(2024, 0, 6), // Saturday
-      sunday: new Date(2024, 0, 7), // Sunday
-    };
-
-    return Array.from(selectedDays.entries())
-      .filter(([_, value]) => value)
-      .map(([key]) => formatter.format(dayMap[key]))
-      .join(", ");
-  };
-
-  // Helper function to format required value and type
-  const formatRequiredValue = (value: number, type: string) => {
-    const typeMap: { [key: string]: string } = {
-      minutes: "хв",
-      hours: "год",
-      times: "раз",
-      liters: "л",
-    };
-    const typeText = typeMap[type] || type;
-    return `${value} ${typeText}`;
-  };
-
   const handleSave = useCallback(async () => {
     // Pass data back to previous screen
     await addHabit({
       name: formData.name,
       requiredValue: formData.requiredValue,
       requiredType: formData.requiredType,
+      frequency: formData.frequency,
     });
     router.back();
     // You can also use router.setParams() to pass data back
@@ -110,6 +76,14 @@ export default function HabitFormModal() {
     </Pressable>
   );
 
+  const frequencyLabel =
+    formData.frequency.selectedDays.length === 7
+      ? "Щодня"
+      : FREQUENCY.daily.options
+          .filter((option) => formData.frequency.selectedDays.includes(option.value))
+          .map((option) => option.shortLabel)
+          .join(", ");
+
   return (
     <>
       <StatusBar barStyle="dark-content" />
@@ -132,14 +106,14 @@ export default function HabitFormModal() {
               onChangeText={(text) => updateFormData({ name: text })}
             />
           </HStack>
-          {/* <SelectionRow
+          <SelectionRow
             icon={<Icon as={Repeat} />}
-            label="ПОВТОРИТИ"
-            value={formatSelectedDays(formData.selectedDays)}
+            label="Частота"
+            value={frequencyLabel}
             onPress={() => {
               router.push("/create-habbit/frequency");
             }}
-          /> */}
+          />
 
           {/* <SelectionRow
             icon={<Icon as={Target} />}
